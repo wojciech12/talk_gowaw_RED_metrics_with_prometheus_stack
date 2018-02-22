@@ -1,0 +1,543 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>RED metrics for services in Golang with Prometheus stack</title>
+
+		<!-- bootstrap -->
+		<link rel="stylesheet" href="ext/bootstrap-4.0.0-beta/bootstrap.min.css">
+
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/white.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<!-- link rel="stylesheet" href="lib/css/zenburn.css" -->
+
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<style>
+			.reveal section img {
+				background-color:white;
+				border:0;
+				box-shadow: 0 0 0 0;
+			}
+		</style>
+	</head>
+	<body>
+
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h3 style="text-transform: none !important;">Metryki RED dla aplikacji REST<br /> z Prometheus + AlertManagera</h1>
+
+					<img src="img/logo_prometheus.png" width="40%" />
+
+					<h6><small>Wojciech Barczyński (wojciech.barczynski@smacc.io)</small></h6>
+				</section>
+
+				<section>
+					<h3>Wojciech Barczyński</h3>
+
+					<ul>
+						<li>Senior Software Engineer - SMACC (FinTech/AI)</li>
+						<li>Before:<br />System Engineer Lyke</li>
+						<li>Before:<br />1000+ nodes, 20 data centers with Openstack</li>
+						<!-- li>System Engineer background</li -->
+						<li>Interests:<br />Working software</li>
+						<li>Hobby:<br />teaching software engineering</li>
+					</ul>
+
+				</section>
+
+				<section>
+					<h3>Why?</h3>
+					<h4>Monolit ;) </h4>
+					<img src="img/rubber_duck_monolit.jpg" width="80%">
+				</section>
+
+				<section>
+					<h3>Why?</h3>
+					<h4>Microservices ;) </h4>
+					<img src="img/rubber_duck_microservices.jpg" width="70%">
+				</section>
+
+				<section>
+					<h3>Centralized Logging</h3>
+					<ul>
+						<li>Usually much too late</li>
+						<li>Post-mortem</li>
+						<li>Hard to find the needle</li>
+						<li>Like a debugging</li>
+					</ul>
+				</section>
+
+				<section>
+					<h3>Monitoring</h3>
+					<ul>
+						<li>Liczby</li>
+						<li>Trendy</li>
+						<li>Zależności</li>
+					</ul>
+				</section>
+
+				<section>
+					<h3>Monitoring</h3>
+					<img src="img/kubernetes-grafana-cluster-1024x503.png" width="80%" />
+
+					<small>Example from <a href="https://blog.couchbase.com/wp-content/original-assets/december-2016/kubernetes-monitoring-with-heapster-influxdb-and-grafana/">couchbase blog</a></small>
+				</section>
+
+				<section>
+					<h3>Jak znależć właściwe metryki?</h3>
+					<h5>
+						<ul>
+							<li>USE</li>
+							<li>RED</li>
+						</ul>
+					</h5>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+						## USE
+
+						- **u**tilization
+						- **s**aturation
+						- **e**rrors
+
+<small>See http://www.brendangregg.com/usemethod.html</small>
+					</script>
+				</section>
+
+		<section data-markdown>
+			<script type="text/template">
+				## USE
+
+- **utilization**: as a percent over a time interval. eg, "one disk is running at 90% utilization".
+- **saturation**:
+- **errors**:
+
+<small>See http://www.brendangregg.com/usemethod.html</small>
+					</script>
+				</section>
+		<section data-markdown>
+			<script type="text/template">
+				## USE
+
+- **utilization**:
+- **saturation**: as a queue length. eg, "the CPUs have an average run queue length of four".
+- **errors**:
+
+<small>See http://www.brendangregg.com/usemethod.html</small>
+					</script>
+				</section>
+
+		<section data-markdown>
+			<script type="text/template">
+				## USE
+
+- **utilization**:
+- **saturation**:
+- **errors**: scalar counts. eg, "this network interface drops packages".
+
+<small>See http://www.brendangregg.com/usemethod.html</small>
+					</script>
+				</section>
+
+		<section data-markdown>
+			<script type="text/template">
+				## USE
+
+- **traditionaly** more instance oriented
+- still useful in the microservices world
+
+<small>See http://www.brendangregg.com/usemethod.html</small>
+					</script>
+				</section>
+
+				<section data-markdown><!-- workload -->
+					<script type="text/template">
+						## RED
+
+						- **r**ate
+						- **e**rror (rate)
+						- **d**uration (distribution)
+
+<center><small>Service oriented</small></center>
+					</script>
+				</section>
+
+				<section data-markdown><!-- workload -->
+					<script type="text/template">
+						## RED
+
+						- **rate** - how many request per seconds handled
+						- **error**
+						- **duration** (distribution)
+					</script>
+				</section>
+
+				<section data-markdown><!-- workload -->
+					<script type="text/template">
+						## RED
+
+						- **rate**
+						- **error** - how many request per seconds handled we failed
+						- **duration**
+					</script>
+				</section>
+
+				<section data-markdown><!-- workload -->
+					<script type="text/template">
+						## RED
+
+						- **rate**
+						- **error**
+						- **duration** - how long the requests took
+					</script>
+				</section>
+
+
+				<section data-markdown>
+					<script type="text/template">
+						## RED
+
+						- Follow Four Golden Signals by Google SREs [1]
+						- Focus on what matters for end-users
+
+<center><small>[1] Latency, Traffic, Errors, Saturation (<a href="https://landing.google.com/sre/book/chapters/monitoring-distributed-systems.html">src</a>)</small></center>
+					</script>
+				</section>
+
+				<section data-markdown><!-- workload -->
+					<script type="text/template">
+						<h2>Notice</h2>
+
+- not recommended for batch-oriented or streaming services
+ 					</script>
+ 				</section>
+
+				<section>
+					<h3>My Weapons of choice</h3>
+					<ul>
+						<li>Prometheus</li>
+						<li>Alertmanager</li>
+						<li>Grafana</li>
+						<li>Not covered here: OpsGenie, StatusCake</li>
+					</ul>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					## Prometheus
+
+					- wide support for languages
+					- metrics collected over HTTP *metrics/*
+					- metrics in text
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					## Prometheus
+
+					- Easy semantic
+					- Large number of prometheus exporters
+					- Focus on low TCO and simplicity
+					- Powerful query and alarm rule language
+					- Pull model [1]
+
+<center><small>[1] I prefer it</small></center>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					### Metric Types
+
+					- Counter - just up
+					- Gauge - up/down
+					- Histogram - samples observation (*sum* + *count* with *buckets*)
+					- Summary - (*sum* + *count*)
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					#### Simple REST service
+
+<pre><code>
+     -----------         ---------------
+    |    App    | ----->| Audit Service |
+    | OrderMgmt |       |               |
+     -----------         ---------------
+        |
+        |          ---------------
+         -------->|   Database    |
+                   ---------------</code></pre>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					#### Simple REST service
+
+<pre><code class="bash" data-trim="" width="100%">curl 127.0.0.1:8080/hello
+curl 127.0.0.1:8080/world
+curl 127.0.0.1:8080/complex</code></pre>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					#### Simple REST service
+
+<pre><code class="bash" data-trim="" width="100%">
+curl 127.0.0.1:8080/complex?is_srv_error=True
+curl 127.0.0.1:8080/complex?is_db_error=True
+curl 127.0.0.1:8080/complex?db_sleep=3&srv_sleep=2
+</code></pre>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					#### Operation endpoints
+
+<code>metrics/</code>
+
+Omited:
+- <i>health/</i>
+- <i>info/</li>
+- <i>alertrules/</i>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					### Golang client
+
+					- https://github.com/prometheus/client_golang
+
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+						### Demo: Code
+
+						- Metric definition
+						- Metric collection
+						- Exposing metrics <code>metrics/</code>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+						### Demo: Prom Stack
+
+						- Prometheus dashboard and config
+						- AlertManager dashboard and config
+						- Simulate the successful and failed calls
+						- Simple Queries for rate
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					## Prometheus
+<pre><code class="yaml" data-trim="" width="100%">
+sum(irate(order_mgmt_duration_seconds_count{job=~".*"}[1m]))
+   by (status_code)</pre></code>
+				</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					## Prometheus
+<pre><code class="yaml" data-trim="" width="100%">
+order_mgmt_duration_seconds_sum{job=~".*"} or
+order_mgmt_database_duration_seconds_sum{job=~".*"} or
+order_mgmt_audit_duration_seconds_sum{job=~".*"}
+</code></pre>
+				</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+						### Metric names
+
+						Which one is better?
+
+						- request_duration{app=my_app}
+						- my_app_request_duration
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+						### Metric names
+
+						Which one is better?
+
+						- order_mgmt_db_duration_seconds_sum
+						- order_mgmt_duration_seconds_sum{dep_name='db'}
+					</script>
+				</section>
+
+				<section>
+					<h3>Prometheus Exporters</h3>
+					<ul>
+						<li>Mongodb</li>
+						<li>Postresql</li>
+						<li>...</li>
+					</ul>
+				</section>
+
+				<section>
+					<h3>Monitoring ingress</h3>
+					<img src="img/traefik_architecture.svg" width="80%"/>
+					<small>  - --web.metrics.prometheus</small>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+					### Next steps
+
+					- Extend the sample application with OpenZipkin
+					- In daily work, evaluating new: <a>linkerd.io</a>, <a>istio.io</a>, ...
+					</script>
+				</section>
+
+				<section>
+					<h3>Summary</h3>
+					<ul>
+						<li>Monitoring saves your time</li>
+						<li>Checking logs <b>Kibana</b> to check whether your component works is like debuging vs having tests</li>
+						<li>Logging -&gt; high TCO</li>
+					</ul>
+				</section>
+
+				<!--
+					BACKUP SLIDES
+				-->
+			<section data-background="img/smacc_header_IT_source.jpg" data-background-repeat="" data-background-size="100%" data-background-position="bottom" style="position: relative; top:0">
+				<h1>Backup Slides</h1>
+			</section>
+
+				<section>
+					<h5>Use Labels in Alert Rules</h5>
+<pre><code>ALERT ProductionAppServiceInstanceDown
+   IF up { environment = "production", app =~ ".+"} == 0
+   FOR 4m
+   ANNOTATIONS {
+        summary = "Instance of {{$labels.app}} is down",
+        description = " Instance  {{$labels.instance}} of app {{$labels.app}} has been down for more than 4 minutes"
+   }</code></pre>
+   <small>see ../src/prometheus/etc/alert.rules</small>
+		 		</section>
+
+				<section>
+					<h5>Use Labels in Alert Routing</h5>
+<small>Call somebody if the label is <code>severity=page</code>:</small>
+<pre><code>---
+ group_by: [cluster]
+ # If an alert isn't caught by a route, send it to the pager.
+ receiver: team-pager
+ routes:
+  - match:
+      severity: page
+    receiver: team-pager
+
+receivers:
+- name: team-pager
+  opsgenie_configs:
+  - api_key: $API_KEY
+    teams: example_team</code></pre>
+   <small>see ../src/alertmanager/*.conf</small>
+</section>
+
+
+			<section data-background="img/smacc_header_IT_source.jpg" data-background-repeat="" data-background-size="100%" data-background-position="bottom" style="position: relative; top:0">
+				<h1>Thank you</h1>
+			</section>
+
+			<section>
+				<h7>Warsaw Office in BL Astoria:</h7>
+				<img src="img/smacc_we_are_hiring.jpg" />
+			</section>
+
+			<section data-background="img/smacc_header_IT_source.jpg" data-background-repeat="" data-background-size="100%" data-background-position="bottom"
+			style="position: relative; top:0">
+				<h4>Questions?</h4>
+			</section>
+				<!--
+					BACKUP SLIDES
+				-->
+			<section data-background="img/smacc_header_IT_source.jpg" data-background-repeat="" data-background-size="100%" data-background-position="bottom" style="position: relative; top:0">
+				<h1>Backup Slides</h1>
+			</section>
+
+			<section>
+				<h2>Prometheus + K8S = :)</h2>
+				<h5>Labels are propagated from k8s to prometheus</h5>
+			</section>
+
+							<section>
+								<h5>Integration with Prometheus</h5>
+			<small><code>cat memcached-0-service.yaml</code></small><pre><code class="yaml" data-trim="" width="100%">---
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: memcached-0
+    labels:
+       app: memcached
+       kubernetes.io/name: "memcached"
+       role: shard-0
+     annotations:
+       prometheus.io/scrape: "true"
+       prometheus.io/scheme: "http"
+       prometheus.io/path: "metrics"
+       prometheus.io/port: "9150"
+   spec:
+     type: NodePort
+     ports:
+       - port: 11211
+         targetPort: 11211
+     selector:
+       app: memcached
+       role: shard-0</code></pre><small>https://github.com/skarab7/kubernetes-memcached</small>
+							</section>
+			</div>
+		</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
