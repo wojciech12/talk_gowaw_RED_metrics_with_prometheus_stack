@@ -7,7 +7,7 @@ RED metrics for a REST servise with Prometheus, AlertManager, and Grafana
 Demo Part
 =========
 
-see `a sample Python app <../src>`_
+see `a sample Golang app <../src>`_
 
 Generate PDF
 ============

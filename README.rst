@@ -7,3 +7,4 @@ Related Work
 
 - https://www.weave.works/blog/the-red-method-key-metrics-for-microservices-architecture/
 - http://www.brendangregg.com/usemethod.html
+- https://github.com/prometheus/client_golang/blob/master/examples/random/main.go
