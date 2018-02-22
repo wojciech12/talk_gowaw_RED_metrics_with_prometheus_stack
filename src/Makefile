@@ -13,6 +13,7 @@ stop:
 rebuild:
 	docker-compose -f docker-compose.yaml --project-name $(DOCKER_PROJECT_NAME) build
 
+# reload the config from the disk
 prometheus_reload_config:
 	curl 127.0.0.1:9090/-/reload -X POST
 

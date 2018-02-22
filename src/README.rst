@@ -59,4 +59,5 @@ The code is based on: https://github.com/microdevs/missy
 Related Work
 ============
 
-- - https://www.robustperception.io/combining-alert-conditions/
+- https://prometheus.io/docs/prometheus/latest/querying/functions/
+- https://www.robustperception.io/combining-alert-conditions/
