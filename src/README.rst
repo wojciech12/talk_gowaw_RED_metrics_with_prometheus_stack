@@ -44,8 +44,8 @@ Prometheus Query
     ::
 
       sum(irate(order_mgmt_duration_seconds_count{job=~".*", status_code=~"5.."}[1m]))
-
-  – will give you the 5-min moving 99th percentile request latency:
+      
+  - will give you the 5-min moving 99th percentile request latency:
 
     ::
 
