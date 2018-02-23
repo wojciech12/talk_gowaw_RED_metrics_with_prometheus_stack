@@ -34,7 +34,7 @@ srv_random_trafic_complex_failed_third_party:
 	curl 127.0.0.1:8080/complex?is_srv_error=True
 
 srv_wrk_random:
-	 wrk -t8 -c12 -d60s -s tools/load_generator/mixed.lua http://127.0.0.1:8080
+	 wrk -t8 -c12 -d360s -s tools/load_generator/mixed.lua http://127.0.0.1:8080
 
 ensure_formatting:
 	goimports -w *.go && goimports -w */*.go
